@@ -28,22 +28,40 @@ const Register = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4">
-            <div className="w-full max-w-md">
-                <div className="text-center mb-6">
-                    <FaHeart className="text-5xl text-pink-500 mx-auto mb-3 animate-pulse" />
-                    <h1 className="text-3xl font-bold text-purple-600 mb-2">
-                        Daftar Akun Baru
+        <div className="min-h-screen page-shell">
+            <div className="mx-auto flex min-h-screen max-w-6xl flex-col items-center justify-center gap-10 px-4 py-10 lg:flex-row lg:gap-12">
+                <div className="w-full max-w-lg space-y-6 text-center lg:text-left">
+                    <div className="flex items-center justify-center gap-3 lg:justify-start">
+                        <div className="glow-ring">
+                            <FaHeart className="text-2xl" />
+                        </div>
+                        <span className="chip">New Account</span>
+                    </div>
+                    <h1 className="text-4xl font-bold title-gradient lg:text-5xl">
+                        Buat akun baru
                     </h1>
-                    <p className="text-gray-600">Buat akun untuk main dengan Fika</p>
+                    <p className="text-lg text-white/70">
+                        Pilih nama panggilan, lalu mulai permainan kecil buat Fika.
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-3 lg:justify-start">
+                        <span className="chip">Aman</span>
+                        <span className="chip">Cepat</span>
+                        <span className="chip">Siap main</span>
+                    </div>
                 </div>
 
-                <div className="card">
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="w-full max-w-md glass-card p-6 md:p-8">
+                    <div className="mb-6 flex items-center justify-between">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Username
-                            </label>
+                            <p className="text-sm text-white/60">Get started</p>
+                            <h2 className="text-2xl font-semibold">Daftar</h2>
+                        </div>
+                        <FaUser className="text-white/40" />
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-white/80">Username</label>
                             <input
                                 type="text"
                                 value={username}
@@ -54,10 +72,8 @@ const Register = () => {
                             />
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Nama Panggilan (opsional)
-                            </label>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-white/80">Nama Panggilan</label>
                             <input
                                 type="text"
                                 value={displayName}
@@ -67,45 +83,37 @@ const Register = () => {
                             />
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Password
-                            </label>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="input-field"
-                                placeholder="Buat password"
-                                required
-                            />
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-white/80">Password</label>
+                            <div className="relative">
+                                <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="input-field pl-10"
+                                    placeholder="Buat password"
+                                    required
+                                />
+                            </div>
                         </div>
 
                         {error && (
-                            <div className="bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-lg text-sm">
+                            <div className="glass-panel border border-rose-400/40 px-4 py-3 text-sm text-rose-100">
                                 {error}
                             </div>
                         )}
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="btn-primary w-full"
-                        >
-                            {loading ? 'Loading...' : 'Daftar 💜'}
+                        <button type="submit" disabled={loading} className="btn-primary w-full">
+                            {loading ? 'Loading...' : 'Daftar Sekarang'}
                         </button>
                     </form>
 
-                    <div className="mt-4 text-center">
-                        <p className="text-gray-600 text-sm">
-                            Sudah punya akun?{' '}
-                            <Link
-                                to="/login"
-                                className="text-purple-600 font-semibold hover:text-pink-600"
-                            >
-                                Masuk di sini
-                            </Link>
-                        </p>
+                    <div className="mt-5 text-center text-sm text-white/70">
+                        Sudah punya akun?{' '}
+                        <Link to="/login" className="font-semibold text-fuchsia-200 hover:text-white">
+                            Masuk di sini
+                        </Link>
                     </div>
                 </div>
             </div>

@@ -45,86 +45,103 @@ const Lobby = () => {
         navigate('/login');
     };
 
-    return (
-        <div className="min-h-screen p-4">
-            <div className="max-w-4xl mx-auto">
-                {/* Header */}
-                <div className="flex justify-between items-center mb-6">
-                    <div>
-                        <h1 className="text-2xl font-bold text-purple-600">
-                            Halo, {user?.displayName || user?.username}! 👋
-                        </h1>
-                        <p className="text-gray-600 text-sm">Siap main tebak-tebakan dengan Fika?</p>
-                    </div>
-                    <button
-                        onClick={handleLogout}
-                        className="btn-secondary flex items-center gap-2 text-sm"
-                    >
-                        <FaSignOutAlt />
-                        Keluar
-                    </button>
-                </div>
+    const isFika = user?.username?.toLowerCase() === 'fika';
 
-                {/* Main Content */}
-                <div className="grid md:grid-cols-2 gap-4">
-                    {/* Create Room */}
-                    <div className="card">
-                        <h2 className="text-lg font-bold text-gray-800 mb-3">Buat Room Baru</h2>
-                        <p className="text-gray-600 text-sm mb-4">
-                            Buat room dan bagikan kode ke Fika
+    return (
+        <div className="min-h-screen page-shell">
+            <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 py-10">
+                <div className="glass-panel flex flex-col gap-4 p-6 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="space-y-2">
+                        <p className="text-sm text-white/60">Lobby</p>
+                        <h1 className="text-3xl font-bold title-gradient">
+                            Halo, {user?.displayName || user?.username}!
+                        </h1>
+                        <p className="text-white/70">
+                            {isFika
+                                ? 'Siap main tebak tebakan dengan pacar kamu?'
+                                : 'Siap main tebak-tebakan dengan Fika?'}
                         </p>
+                    </div>
+                    <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+                        <span className="chip sm:min-w-[120px]">Room privat</span>
+                        <span className="chip sm:min-w-[120px]">2 pemain</span>
+                        <span className="chip sm:min-w-[120px]">Realtime</span>
+                        <span className="chip sm:min-w-[120px]">Untuk Fika</span>
                         <button
-                            onClick={handleCreateRoom}
-                            disabled={loading}
-                            className="btn-primary w-full flex items-center justify-center gap-2"
+                            onClick={handleLogout}
+                            className="btn-secondary flex items-center justify-center gap-2 text-sm sm:min-w-[120px]"
                         >
-                            <FaPlus />
-                            Buat Room
+                            <FaSignOutAlt />
+                            Keluar
                         </button>
                     </div>
+                </div>
 
-                    {/* Join Room */}
-                    <div className="card">
-                        <h2 className="text-lg font-bold text-gray-800 mb-3">Gabung Room</h2>
-                        <form onSubmit={handleJoinRoom} className="space-y-3">
-                            <input
-                                type="text"
-                                value={roomCode}
-                                onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-                                className="input-field"
-                                placeholder="Masukkan kode room"
-                                required
-                                maxLength={8}
-                            />
+                <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+                    <div className="grid gap-6 md:grid-cols-2">
+                        <div className="glass-card p-6">
+                            <h2 className="text-xl font-semibold">Buat Room Baru</h2>
+                            <p className="mt-2 text-sm text-white/70">
+                                Undang Fika lewat kode unik dan mulai pertanyaan pertama.
+                            </p>
                             <button
-                                type="submit"
+                                onClick={handleCreateRoom}
                                 disabled={loading}
-                                className="btn-secondary w-full flex items-center justify-center gap-2"
+                                className="btn-primary mt-6 w-full flex items-center justify-center gap-2"
                             >
-                                <FaSignInAlt />
-                                Gabung Room
+                                <FaPlus />
+                                Buat Room
                             </button>
-                        </form>
+                        </div>
+
+                        <div className="glass-card p-6">
+                            <h2 className="text-xl font-semibold">Gabung Room</h2>
+                            <p className="mt-2 text-sm text-white/70">
+                                Punya kode? Masukkan di sini untuk langsung bergabung.
+                            </p>
+                            <form onSubmit={handleJoinRoom} className="mt-4 space-y-3">
+                                <input
+                                    type="text"
+                                    value={roomCode}
+                                    onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+                                    className="input-field"
+                                    placeholder="Masukkan kode room"
+                                    required
+                                    maxLength={8}
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="btn-secondary w-full flex items-center justify-center gap-2"
+                                >
+                                    <FaSignInAlt />
+                                    Gabung Room
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div className="info-box space-y-4">
+                        <div>
+                            <p className="text-sm text-white/60">Cara main</p>
+                            <h3 className="text-xl font-semibold">Biar makin seru</h3>
+                        </div>
+                        <ul className="space-y-3 text-sm text-white/70">
+                            <li className="glass-panel px-4 py-3">1. Buat room atau gabung pakai kode</li>
+                            <li className="glass-panel px-4 py-3">2. Tunggu sampai 2 orang (kamu & Fika)</li>
+                            <li className="glass-panel px-4 py-3">3. Bebas siapa yang tanya duluan</li>
+                            <li className="glass-panel px-4 py-3">4. Kasih jawaban + kunci jawaban</li>
+                            <li className="glass-panel px-4 py-3">5. Lihat siapa yang paling kenal!</li>
+                            <li className="glass-panel px-4 py-3">Bonus: buat Fika, biar ngobrolnya makin nyambung.</li>
+                        </ul>
                     </div>
                 </div>
 
                 {error && (
-                    <div className="mt-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+                    <div className="glass-panel border border-rose-400/40 px-4 py-3 text-sm text-rose-100">
                         {error}
                     </div>
                 )}
-
-                {/* Info */}
-                <div className="mt-6 card bg-purple-50">
-                    <h3 className="font-bold text-purple-800 mb-2">💡 Cara Main:</h3>
-                    <ul className="text-sm text-purple-700 space-y-1">
-                        <li>1. Buat room atau gabung pakai kode</li>
-                        <li>2. Tunggu sampai 2 orang (kamu & Fika)</li>
-                        <li>3. Bebas siapa yang tanya duluan</li>
-                        <li>4. Kasih jawaban + kunci jawaban</li>
-                        <li>5. Lihat siapa yang paling kenal!</li>
-                    </ul>
-                </div>
             </div>
         </div>
     );

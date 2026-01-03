@@ -27,24 +27,42 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4">
-            <div className="w-full max-w-md">
-                <div className="text-center mb-6">
-                    <FaHeart className="text-5xl text-pink-500 mx-auto mb-3 animate-pulse" />
-                    <h1 className="text-3xl font-bold text-purple-600 mb-2">
-                        Tebak-tebakan untuk Fika 💜
+        <div className="min-h-screen page-shell">
+            <div className="mx-auto flex min-h-screen max-w-6xl flex-col items-center justify-center gap-10 px-4 py-10 lg:flex-row lg:gap-12">
+                <div className="w-full max-w-lg space-y-6 text-center lg:text-left">
+                    <div className="flex items-center justify-center gap-3 lg:justify-start">
+                        <div className="glow-ring">
+                            <FaHeart className="text-2xl" />
+                        </div>
+                        <span className="chip">Romantic Quiz</span>
+                    </div>
+                    <h1 className="text-4xl font-bold title-gradient lg:text-5xl">
+                        Tebak-tebakan untuk Fika
                     </h1>
-                    <p className="text-gray-600">Seberapa kenal kamu dengan Fika?</p>
+                    <p className="text-lg text-white/70">
+                        Login dulu, lalu mulai sesi ringan bareng Fika yang tetap hangat.
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-3 lg:justify-start">
+                        <span className="chip">Room privat</span>
+                        <span className="chip">Real-time</span>
+                        <span className="chip">Tema ungu</span>
+                    </div>
                 </div>
 
-                <div className="card">
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="w-full max-w-md glass-card p-6 md:p-8">
+                    <div className="mb-6 flex items-center justify-between">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Username
-                            </label>
+                            <p className="text-sm text-white/60">Welcome back</p>
+                            <h2 className="text-2xl font-semibold">Masuk</h2>
+                        </div>
+                        <FaUser className="text-white/40" />
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-white/80">Username</label>
                             <div className="relative">
-                                <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-400" />
+                                <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
                                 <input
                                     type="text"
                                     value={username}
@@ -56,12 +74,10 @@ const Login = () => {
                             </div>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Password
-                            </label>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-white/80">Password</label>
                             <div className="relative">
-                                <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-400" />
+                                <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
                                 <input
                                     type="password"
                                     value={password}
@@ -74,30 +90,21 @@ const Login = () => {
                         </div>
 
                         {error && (
-                            <div className="bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-lg text-sm">
+                            <div className="glass-panel border border-rose-400/40 px-4 py-3 text-sm text-rose-100">
                                 {error}
                             </div>
                         )}
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="btn-primary w-full"
-                        >
-                            {loading ? 'Loading...' : 'Masuk 💜'}
+                        <button type="submit" disabled={loading} className="btn-primary w-full">
+                            {loading ? 'Loading...' : 'Masuk Sekarang'}
                         </button>
                     </form>
 
-                    <div className="mt-4 text-center">
-                        <p className="text-gray-600 text-sm">
-                            Belum punya akun?{' '}
-                            <Link
-                                to="/register"
-                                className="text-purple-600 font-semibold hover:text-pink-600"
-                            >
-                                Daftar di sini
-                            </Link>
-                        </p>
+                    <div className="mt-5 text-center text-sm text-white/70">
+                        Belum punya akun?{' '}
+                        <Link to="/register" className="font-semibold text-fuchsia-200 hover:text-white">
+                            Daftar di sini
+                        </Link>
                     </div>
                 </div>
             </div>
