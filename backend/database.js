@@ -1,6 +1,9 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
+// Force load mysql2 driver for Vercel
+require('mysql2');
+
 const sequelize = new Sequelize(
     process.env.DB_NAME,
     process.env.DB_USER,
