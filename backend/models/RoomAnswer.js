@@ -24,7 +24,7 @@ const RoomAnswer = sequelize.define('RoomAnswer', {
     },
     correctAnswerText: {
         type: DataTypes.STRING(200),
-        allowNull: false,
+        allowNull: true,
         field: 'correct_answer_text'
     },
     isCorrect: {

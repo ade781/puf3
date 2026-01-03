@@ -43,7 +43,7 @@ const createQuestion = async (req, res) => {
 
 const submitAnswer = async (req, res) => {
     try {
-        const { questionId, answerText, correctAnswerText } = req.body;
+        const { questionId, answerText } = req.body;
         const userId = req.userId;
 
         const question = await RoomQuestion.findByPk(questionId, {
@@ -63,38 +63,17 @@ const submitAnswer = async (req, res) => {
             return res.status(400).json({ message: 'You have already answered this question' });
         }
 
-        // Determine if answer is correct (compare with the other user's correct answer)
-        const otherUserId = question.room.user1Id === userId ? question.room.user2Id : question.room.user1Id;
-        const otherUserAnswer = await RoomAnswer.findOne({
-            where: { questionId, userId: otherUserId }
-        });
-
-        let isCorrect = false;
-        if (otherUserAnswer) {
-            isCorrect = answerText.toLowerCase().trim() === otherUserAnswer.correctAnswerText.toLowerCase().trim();
-        }
-
         const answer = await RoomAnswer.create({
             questionId,
             userId,
             answerText,
-            correctAnswerText,
-            isCorrect
+            correctAnswerText: null
         });
 
         // Check if both answered, mark question as completed
         const allAnswers = await RoomAnswer.findAll({ where: { questionId } });
         if (allAnswers.length >= 2) {
             await question.update({ status: 'completed' });
-
-            // Update isCorrect for both answers
-            for (const ans of allAnswers) {
-                const otherAns = allAnswers.find(a => a.id !== ans.id);
-                if (otherAns) {
-                    const correct = ans.answerText.toLowerCase().trim() === otherAns.correctAnswerText.toLowerCase().trim();
-                    await ans.update({ isCorrect: correct });
-                }
-            }
         }
 
         res.status(201).json({

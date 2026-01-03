@@ -15,7 +15,6 @@ const Room = () => {
 
   const [questionText, setQuestionText] = useState('');
   const [myAnswer, setMyAnswer] = useState('');
-  const [myCorrectAnswer, setMyCorrectAnswer] = useState('');
   const [showInput, setShowInput] = useState(false);
 
   useEffect(() => {
@@ -64,11 +63,9 @@ const Room = () => {
     try {
       await api.post('/game/answer', {
         questionId: currentQuestion.id,
-        answerText: myAnswer,
-        correctAnswerText: myCorrectAnswer
+        answerText: myAnswer
       });
       setMyAnswer('');
-      setMyCorrectAnswer('');
       fetchRoomState();
     } catch (error) {
       alert(error.response?.data?.message || 'Gagal submit jawaban');
@@ -158,13 +155,7 @@ const Room = () => {
                 </div>
                 {myAnswerData && isUser1 && (
                   <div className="glass-panel px-4 py-3 text-xs space-y-2">
-                    <p><span className="text-white/70">Tebakan:</span> {myAnswerData.answerText}</p>
-                    <p><span className="text-white/70">Kunci:</span> {myAnswerData.correctAnswerText}</p>
-                    {bothAnswered && (
-                      <div className={myAnswerData.isCorrect ? 'status-correct' : 'status-wrong'}>
-                        {myAnswerData.isCorrect ? 'Benar' : 'Salah'}
-                      </div>
-                    )}
+                    <p><span className="text-white/70">Jawabanmu:</span> {myAnswerData.answerText}</p>
                   </div>
                 )}
               </div>
@@ -186,15 +177,7 @@ const Room = () => {
                           value={myAnswer}
                           onChange={(e) => setMyAnswer(e.target.value)}
                           className="input-field"
-                          placeholder="Tebakanmu..."
-                          required
-                        />
-                        <input
-                          type="text"
-                          value={myCorrectAnswer}
-                          onChange={(e) => setMyCorrectAnswer(e.target.value)}
-                          className="input-field"
-                          placeholder="Kunci jawabanmu..."
+                          placeholder="Jawabanmu..."
                           required
                         />
                         <button type="submit" className="btn-primary w-full text-sm">
@@ -208,23 +191,11 @@ const Room = () => {
                           <div className="space-y-3 text-xs">
                             <div className="glass-panel px-3 py-2">
                               <p className="font-semibold">{room?.user1?.displayName}:</p>
-                              <p>Tebakan: {currentQuestion.answers.find(a => a.userId === room.user1.id)?.answerText}</p>
-                              <p>Kunci: {currentQuestion.answers.find(a => a.userId === room.user1.id)?.correctAnswerText}</p>
-                              {currentQuestion.answers.find(a => a.userId === room.user1.id)?.isCorrect ? (
-                                <span className="status-correct inline-block mt-2">Benar</span>
-                              ) : (
-                                <span className="status-wrong inline-block mt-2">Salah</span>
-                              )}
+                              <p>Jawaban: {currentQuestion.answers.find(a => a.userId === room.user1.id)?.answerText}</p>
                             </div>
                             <div className="glass-panel px-3 py-2">
                               <p className="font-semibold">{room?.user2?.displayName}:</p>
-                              <p>Tebakan: {currentQuestion.answers.find(a => a.userId === room.user2.id)?.answerText}</p>
-                              <p>Kunci: {currentQuestion.answers.find(a => a.userId === room.user2.id)?.correctAnswerText}</p>
-                              {currentQuestion.answers.find(a => a.userId === room.user2.id)?.isCorrect ? (
-                                <span className="status-correct inline-block mt-2">Benar</span>
-                              ) : (
-                                <span className="status-wrong inline-block mt-2">Salah</span>
-                              )}
+                              <p>Jawaban: {currentQuestion.answers.find(a => a.userId === room.user2.id)?.answerText}</p>
                             </div>
                           </div>
                         </div>
@@ -284,13 +255,7 @@ const Room = () => {
                 </div>
                 {myAnswerData && !isUser1 && (
                   <div className="glass-panel px-4 py-3 text-xs space-y-2">
-                    <p><span className="text-white/70">Tebakan:</span> {myAnswerData.answerText}</p>
-                    <p><span className="text-white/70">Kunci:</span> {myAnswerData.correctAnswerText}</p>
-                    {bothAnswered && (
-                      <div className={myAnswerData.isCorrect ? 'status-correct' : 'status-wrong'}>
-                        {myAnswerData.isCorrect ? 'Benar' : 'Salah'}
-                      </div>
-                    )}
+                    <p><span className="text-white/70">Jawabanmu:</span> {myAnswerData.answerText}</p>
                   </div>
                 )}
               </div>
