@@ -123,6 +123,9 @@ const Room = () => {
             <p className="text-sm text-white/70">
               {room?.status === 'waiting' ? 'Menunggu pemain ke-2...' : 'Room aktif, lanjut main'}
             </p>
+            <p className="text-xs text-white/60">
+              Buat Fika, biar sesi ini jadi obrolan yang lebih dekat.
+            </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <button onClick={copyCode} className="btn-secondary text-sm flex items-center gap-2">
