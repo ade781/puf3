@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api';
+import questions from '../data/questions.json';
 import { FaCopy, FaSignOutAlt, FaArrowRight } from 'react-icons/fa';
 
 const Room = () => {
@@ -16,6 +17,14 @@ const Room = () => {
   const [questionText, setQuestionText] = useState('');
   const [myAnswer, setMyAnswer] = useState('');
   const [showInput, setShowInput] = useState(false);
+
+  const pickRandomQuestion = () => {
+    if (!questions.length) {
+      return;
+    }
+    const randomIndex = Math.floor(Math.random() * questions.length);
+    setQuestionText(questions[randomIndex]);
+  };
 
   useEffect(() => {
     fetchRoomState();
@@ -229,6 +238,13 @@ const Room = () => {
                           placeholder="Tulis pertanyaan..."
                           required
                         ></textarea>
+                        <button
+                          type="button"
+                          onClick={pickRandomQuestion}
+                          className="btn-secondary w-full text-sm"
+                        >
+                          Pakai pertanyaan acak
+                        </button>
                         <div className="flex gap-3">
                           <button type="button" onClick={() => setShowInput(false)} className="btn-secondary flex-1 text-sm">
                             Batal
