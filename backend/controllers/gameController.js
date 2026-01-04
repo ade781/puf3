@@ -1,4 +1,4 @@
-const { RoomQuestion, RoomAnswer, Room, User } = require('../models');
+const { RoomQuestion, RoomOption, RoomSelection, Room, User } = require('../models');
 
 const createQuestion = async (req, res) => {
     try {
@@ -41,9 +41,9 @@ const createQuestion = async (req, res) => {
     }
 };
 
-const submitAnswer = async (req, res) => {
+const submitOptions = async (req, res) => {
     try {
-        const { questionId, answerText } = req.body;
+        const { questionId, options } = req.body;
         const userId = req.userId;
 
         const question = await RoomQuestion.findByPk(questionId, {
@@ -54,31 +54,109 @@ const submitAnswer = async (req, res) => {
             return res.status(404).json({ message: 'Question not found' });
         }
 
-        // Check if user already answered
-        const existingAnswer = await RoomAnswer.findOne({
+        if (!Array.isArray(options) || options.length < 2) {
+            return res.status(400).json({ message: 'At least two options are required' });
+        }
+
+        const existingOptions = await RoomOption.findOne({
             where: { questionId, userId }
         });
 
-        if (existingAnswer) {
-            return res.status(400).json({ message: 'You have already answered this question' });
+        if (existingOptions) {
+            return res.status(400).json({ message: 'Options already submitted' });
         }
 
-        const answer = await RoomAnswer.create({
-            questionId,
-            userId,
-            answerText,
-            correctAnswerText: null
+        const normalizedOptions = options
+            .map((option) => ({
+                optionText: String(option.optionText || '').trim(),
+                isCorrect: Boolean(option.isCorrect)
+            }))
+            .filter((option) => option.optionText.length > 0);
+
+        if (normalizedOptions.length < 2) {
+            return res.status(400).json({ message: 'At least two valid options are required' });
+        }
+
+        const correctCount = normalizedOptions.filter((option) => option.isCorrect).length;
+        if (correctCount !== 1) {
+            return res.status(400).json({ message: 'Exactly one option must be marked correct' });
+        }
+
+        const createdOptions = await RoomOption.bulkCreate(
+            normalizedOptions.map((option) => ({
+                questionId,
+                userId,
+                optionText: option.optionText,
+                isCorrect: option.isCorrect
+            }))
+        );
+
+        res.status(201).json({
+            message: 'Options submitted successfully',
+            options: createdOptions
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+const submitSelection = async (req, res) => {
+    try {
+        const { questionId, selectedOptionId } = req.body;
+        const userId = req.userId;
+
+        if (!selectedOptionId) {
+            return res.status(400).json({ message: 'Selected option is required' });
+        }
+
+        const question = await RoomQuestion.findByPk(questionId, {
+            include: [{ model: Room, as: 'room' }]
         });
 
-        // Check if both answered, mark question as completed
-        const allAnswers = await RoomAnswer.findAll({ where: { questionId } });
-        if (allAnswers.length >= 2) {
+        if (!question) {
+            return res.status(404).json({ message: 'Question not found' });
+        }
+
+        if (question.room.user1Id !== userId && question.room.user2Id !== userId) {
+            return res.status(403).json({ message: 'You are not in this room' });
+        }
+
+        const existingSelection = await RoomSelection.findOne({
+            where: { questionId, userId }
+        });
+
+        if (existingSelection) {
+            return res.status(400).json({ message: 'You already selected an option' });
+        }
+
+        const selectedOption = await RoomOption.findOne({
+            where: { id: selectedOptionId, questionId }
+        });
+
+        if (!selectedOption) {
+            return res.status(404).json({ message: 'Selected option not found' });
+        }
+
+        if (selectedOption.userId === userId) {
+            return res.status(400).json({ message: 'You cannot pick your own options' });
+        }
+
+        const selection = await RoomSelection.create({
+            questionId,
+            userId,
+            selectedOptionId: selectedOption.id,
+            isCorrect: selectedOption.isCorrect
+        });
+
+        const allSelections = await RoomSelection.findAll({ where: { questionId } });
+        if (allSelections.length >= 2) {
             await question.update({ status: 'completed' });
         }
 
         res.status(201).json({
-            message: 'Answer submitted successfully',
-            answer
+            message: 'Selection submitted successfully',
+            selection
         });
     } catch (error) {
         console.error(error);
@@ -110,9 +188,17 @@ const getCurrentQuestion = async (req, res) => {
             include: [
                 { model: User, as: 'askedBy', attributes: ['id', 'username', 'displayName'] },
                 {
-                    model: RoomAnswer,
-                    as: 'answers',
+                    model: RoomOption,
+                    as: 'options',
                     include: [{ model: User, as: 'user', attributes: ['id', 'username', 'displayName'] }]
+                },
+                {
+                    model: RoomSelection,
+                    as: 'selections',
+                    include: [
+                        { model: User, as: 'user', attributes: ['id', 'username', 'displayName'] },
+                        { model: RoomOption, as: 'selectedOption' }
+                    ]
                 }
             ]
         });
@@ -139,9 +225,17 @@ const getQuestionHistory = async (req, res) => {
             include: [
                 { model: User, as: 'askedBy', attributes: ['id', 'username', 'displayName'] },
                 {
-                    model: RoomAnswer,
-                    as: 'answers',
+                    model: RoomOption,
+                    as: 'options',
                     include: [{ model: User, as: 'user', attributes: ['id', 'username', 'displayName'] }]
+                },
+                {
+                    model: RoomSelection,
+                    as: 'selections',
+                    include: [
+                        { model: User, as: 'user', attributes: ['id', 'username', 'displayName'] },
+                        { model: RoomOption, as: 'selectedOption' }
+                    ]
                 }
             ],
             order: [['createdAt', 'DESC']]
@@ -175,7 +269,8 @@ const nextQuestion = async (req, res) => {
 
 module.exports = {
     createQuestion,
-    submitAnswer,
+    submitOptions,
+    submitSelection,
     getCurrentQuestion,
     getQuestionHistory,
     nextQuestion

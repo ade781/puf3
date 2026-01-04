@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api';
-import questions from '../data/questions.json';
-import { FaCopy, FaSignOutAlt, FaArrowRight } from 'react-icons/fa';
+import { FaCopy, FaSignOutAlt, FaArrowRight, FaPlus, FaTrash } from 'react-icons/fa';
 
 const Room = () => {
   const { code } = useParams();
@@ -15,22 +14,29 @@ const Room = () => {
   const [loading, setLoading] = useState(true);
 
   const [questionText, setQuestionText] = useState('');
-  const [myAnswer, setMyAnswer] = useState('');
   const [showInput, setShowInput] = useState(false);
 
-  const pickRandomQuestion = () => {
-    if (!questions.length) {
-      return;
-    }
-    const randomIndex = Math.floor(Math.random() * questions.length);
-    setQuestionText(questions[randomIndex]);
-  };
+  const [options, setOptions] = useState([
+    { text: '', isCorrect: true },
+    { text: '', isCorrect: false }
+  ]);
+  const [selectedOptionId, setSelectedOptionId] = useState(null);
 
   useEffect(() => {
     fetchRoomState();
     const interval = setInterval(fetchRoomState, 2000);
     return () => clearInterval(interval);
   }, [code]);
+
+  useEffect(() => {
+    if (currentQuestion?.id) {
+      setOptions([
+        { text: '', isCorrect: true },
+        { text: '', isCorrect: false }
+      ]);
+      setSelectedOptionId(null);
+    }
+  }, [currentQuestion?.id]);
 
   const fetchRoomState = async () => {
     try {
@@ -67,17 +73,84 @@ const Room = () => {
     }
   };
 
-  const handleSubmitAnswer = async (e) => {
+  const handleOptionTextChange = (index, value) => {
+    setOptions((prev) => prev.map((option, i) => {
+      if (i === index) {
+        return { ...option, text: value };
+      }
+      return option;
+    }));
+  };
+
+  const handleSetCorrect = (index) => {
+    setOptions((prev) => prev.map((option, i) => ({
+      ...option,
+      isCorrect: i === index
+    })));
+  };
+
+  const handleAddOption = () => {
+    setOptions((prev) => [...prev, { text: '', isCorrect: false }]);
+  };
+
+  const handleRemoveOption = (index) => {
+    setOptions((prev) => {
+      if (prev.length <= 2) {
+        return prev;
+      }
+      const nextOptions = prev.filter((_, i) => i !== index);
+      if (!nextOptions.some((option) => option.isCorrect)) {
+        nextOptions[0].isCorrect = true;
+      }
+      return nextOptions;
+    });
+  };
+
+  const submitOptions = async (e) => {
     e.preventDefault();
+    const payload = options
+      .map((option) => ({
+        optionText: option.text.trim(),
+        isCorrect: option.isCorrect
+      }))
+      .filter((option) => option.optionText.length > 0);
+
+    if (payload.length < 2) {
+      alert('Minimal 2 opsi harus diisi.');
+      return;
+    }
+
+    if (payload.filter((option) => option.isCorrect).length !== 1) {
+      alert('Pilih tepat 1 jawaban benar.');
+      return;
+    }
+
     try {
-      await api.post('/game/answer', {
+      await api.post('/game/options', {
         questionId: currentQuestion.id,
-        answerText: myAnswer
+        options: payload
       });
-      setMyAnswer('');
       fetchRoomState();
     } catch (error) {
-      alert(error.response?.data?.message || 'Gagal submit jawaban');
+      alert(error.response?.data?.message || 'Gagal mengirim opsi');
+    }
+  };
+
+  const submitSelection = async (e) => {
+    e.preventDefault();
+    if (!selectedOptionId) {
+      alert('Pilih salah satu opsi.');
+      return;
+    }
+
+    try {
+      await api.post('/game/selection', {
+        questionId: currentQuestion.id,
+        selectedOptionId
+      });
+      fetchRoomState();
+    } catch (error) {
+      alert(error.response?.data?.message || 'Gagal mengirim pilihan');
     }
   };
 
@@ -113,9 +186,19 @@ const Room = () => {
   }
 
   const isUser1 = room?.user1?.id === user?.id;
-  const hasAnswered = currentQuestion?.answers?.some(a => a.userId === user?.id);
-  const bothAnswered = currentQuestion?.answers?.length >= 2;
-  const myAnswerData = currentQuestion?.answers?.find(a => a.userId === user?.id);
+  const questionOptions = currentQuestion?.options || [];
+  const myOptions = questionOptions.filter((option) => option.userId === user?.id);
+  const otherOptions = questionOptions.filter((option) => option.userId !== user?.id);
+  const uniqueOptionOwners = new Set(questionOptions.map((option) => option.userId));
+  const bothOptionsReady = uniqueOptionOwners.size >= 2;
+
+  const selections = currentQuestion?.selections || [];
+  const mySelection = selections.find((selection) => selection.userId === user?.id);
+  const otherSelection = selections.find((selection) => selection.userId !== user?.id);
+  const bothSelectionsReady = selections.length >= 2;
+
+  const myCorrectOption = myOptions.find((option) => option.isCorrect);
+  const otherCorrectOption = otherOptions.find((option) => option.isCorrect);
 
   return (
     <div className="min-h-screen page-shell">
@@ -134,6 +217,9 @@ const Room = () => {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
+            <Link to={`/room/${code}/music`} className="btn-secondary text-sm">
+              Mode Tebak Lagu
+            </Link>
             <button onClick={copyCode} className="btn-secondary text-sm flex items-center gap-2">
               <FaCopy /> Salin Kode
             </button>
@@ -162,9 +248,9 @@ const Room = () => {
                   </p>
                   {isUser1 && <p className="text-xs text-fuchsia-200">(Kamu)</p>}
                 </div>
-                {myAnswerData && isUser1 && (
+                {isUser1 && myCorrectOption && (
                   <div className="glass-panel px-4 py-3 text-xs space-y-2">
-                    <p><span className="text-white/70">Jawabanmu:</span> {myAnswerData.answerText}</p>
+                    <p><span className="text-white/70">Kunci kamu:</span> {myCorrectOption.optionText}</p>
                   </div>
                 )}
               </div>
@@ -179,42 +265,108 @@ const Room = () => {
                       <h2 className="text-xl font-semibold">{currentQuestion.questionText}</h2>
                     </div>
 
-                    {!hasAnswered ? (
-                      <form onSubmit={handleSubmitAnswer} className="space-y-3">
-                        <input
-                          type="text"
-                          value={myAnswer}
-                          onChange={(e) => setMyAnswer(e.target.value)}
-                          className="input-field"
-                          placeholder="Jawabanmu..."
-                          required
-                        />
+                    {!myOptions.length ? (
+                      <form onSubmit={submitOptions} className="space-y-3">
+                        <p className="text-sm text-white/70">
+                          Isi opsi jawaban kamu, lalu pilih satu kunci yang benar.
+                        </p>
+                        <div className="space-y-3">
+                          {options.map((option, index) => (
+                            <div key={index} className="glass-panel px-3 py-2 flex items-center gap-3">
+                              <input
+                                type="radio"
+                                name="correctOption"
+                                checked={option.isCorrect}
+                                onChange={() => handleSetCorrect(index)}
+                              />
+                              <input
+                                type="text"
+                                value={option.text}
+                                onChange={(e) => handleOptionTextChange(index, e.target.value)}
+                                className="input-field flex-1"
+                                placeholder={`Opsi ${index + 1}`}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveOption(index)}
+                                className="btn-secondary text-xs"
+                                disabled={options.length <= 2}
+                              >
+                                <FaTrash />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                          <button type="button" onClick={handleAddOption} className="btn-secondary text-sm">
+                            <FaPlus /> Tambah opsi
+                          </button>
+                          <button type="submit" className="btn-primary flex-1 text-sm">
+                            Kirim Opsi
+                          </button>
+                        </div>
+                      </form>
+                    ) : !bothOptionsReady ? (
+                      <div className="text-center text-sm waiting-pulse py-4">
+                        Menunggu lawan selesai membuat opsi...
+                      </div>
+                    ) : !mySelection ? (
+                      <form onSubmit={submitSelection} className="space-y-3">
+                        <p className="text-sm text-white/70">
+                          Pilih jawaban yang menurutmu benar untuk lawanmu.
+                        </p>
+                        <div className="space-y-2">
+                          {otherOptions.map((option) => (
+                            <label key={option.id} className="glass-panel px-3 py-2 flex items-center gap-3">
+                              <input
+                                type="radio"
+                                name="selectedOption"
+                                value={option.id}
+                                checked={selectedOptionId === option.id}
+                                onChange={() => setSelectedOptionId(option.id)}
+                              />
+                              <span>{option.optionText}</span>
+                            </label>
+                          ))}
+                        </div>
                         <button type="submit" className="btn-primary w-full text-sm">
-                          Kirim Jawaban
+                          Kirim Pilihan
                         </button>
                       </form>
-                    ) : bothAnswered ? (
+                    ) : !bothSelectionsReady ? (
+                      <div className="text-center text-sm waiting-pulse py-4">
+                        Menunggu lawan memilih jawaban...
+                      </div>
+                    ) : (
                       <div className="space-y-3">
                         <div className="glass-panel p-4 space-y-3">
-                          <p className="text-sm font-semibold">Hasil</p>
+                          <p className="text-sm font-semibold">Hasil Tebakan</p>
                           <div className="space-y-3 text-xs">
                             <div className="glass-panel px-3 py-2">
                               <p className="font-semibold">{room?.user1?.displayName}:</p>
-                              <p>Jawaban: {currentQuestion.answers.find(a => a.userId === room.user1.id)?.answerText}</p>
+                              <p>Kunci: {questionOptions.find((option) => option.userId === room.user1.id && option.isCorrect)?.optionText}</p>
+                              {selections.find((selection) => selection.userId === room.user2.id) && (
+                                <p>
+                                  Tebakan {room?.user2?.displayName}: {selections.find((selection) => selection.userId === room.user2.id)?.selectedOption?.optionText}
+                                  {' '}({selections.find((selection) => selection.userId === room.user2.id)?.isCorrect ? 'Benar' : 'Salah'})
+                                </p>
+                              )}
                             </div>
                             <div className="glass-panel px-3 py-2">
                               <p className="font-semibold">{room?.user2?.displayName}:</p>
-                              <p>Jawaban: {currentQuestion.answers.find(a => a.userId === room.user2.id)?.answerText}</p>
+                              <p>Kunci: {questionOptions.find((option) => option.userId === room.user2.id && option.isCorrect)?.optionText}</p>
+                              {selections.find((selection) => selection.userId === room.user1.id) && (
+                                <p>
+                                  Tebakan {room?.user1?.displayName}: {selections.find((selection) => selection.userId === room.user1.id)?.selectedOption?.optionText}
+                                  {' '}({selections.find((selection) => selection.userId === room.user1.id)?.isCorrect ? 'Benar' : 'Salah'})
+                                </p>
+                              )}
                             </div>
                           </div>
                         </div>
                         <button onClick={handleNext} className="btn-next w-full text-sm flex items-center justify-center gap-2">
                           Pertanyaan Berikutnya <FaArrowRight />
                         </button>
-                      </div>
-                    ) : (
-                      <div className="text-center text-sm waiting-pulse py-4">
-                        Menunggu pemain lain menjawab...
                       </div>
                     )}
                   </>
@@ -238,13 +390,6 @@ const Room = () => {
                           placeholder="Tulis pertanyaan..."
                           required
                         ></textarea>
-                        <button
-                          type="button"
-                          onClick={pickRandomQuestion}
-                          className="btn-secondary w-full text-sm"
-                        >
-                          Pakai pertanyaan acak
-                        </button>
                         <div className="flex gap-3">
                           <button type="button" onClick={() => setShowInput(false)} className="btn-secondary flex-1 text-sm">
                             Batal
@@ -269,9 +414,9 @@ const Room = () => {
                   </p>
                   {!isUser1 && <p className="text-xs text-fuchsia-200">(Kamu)</p>}
                 </div>
-                {myAnswerData && !isUser1 && (
+                {!isUser1 && myCorrectOption && (
                   <div className="glass-panel px-4 py-3 text-xs space-y-2">
-                    <p><span className="text-white/70">Jawabanmu:</span> {myAnswerData.answerText}</p>
+                    <p><span className="text-white/70">Kunci kamu:</span> {myCorrectOption.optionText}</p>
                   </div>
                 )}
               </div>
@@ -287,8 +432,8 @@ const Room = () => {
                   {history.map((q) => (
                     <div key={q.id} className="history-item text-xs space-y-1">
                       <p className="font-semibold">{q.questionText}</p>
-                      <p className={q.answers.length >= 2 ? 'text-emerald-200' : 'text-white/60'}>
-                        {q.answers.length >= 2 ? 'Selesai' : 'Belum selesai'}
+                      <p className={q.selections?.length >= 2 ? 'text-emerald-200' : 'text-white/60'}>
+                        {q.selections?.length >= 2 ? 'Selesai' : 'Belum selesai'}
                       </p>
                     </div>
                   ))}

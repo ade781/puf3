@@ -1,7 +1,8 @@
 const express = require('express');
 const {
     createQuestion,
-    submitAnswer,
+    submitOptions,
+    submitSelection,
     getCurrentQuestion,
     getQuestionHistory,
     nextQuestion
@@ -11,7 +12,8 @@ const auth = require('../middleware/auth');
 const router = express.Router();
 
 router.post('/question', auth, createQuestion);
-router.post('/answer', auth, submitAnswer);
+router.post('/options', auth, submitOptions);
+router.post('/selection', auth, submitSelection);
 router.get('/:roomCode/current', auth, getCurrentQuestion);
 router.get('/:roomCode/history', auth, getQuestionHistory);
 router.post('/:roomCode/next', auth, nextQuestion);

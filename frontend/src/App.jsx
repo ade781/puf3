@@ -6,6 +6,7 @@ import Login from './components/Login_new';
 import Register from './components/Register_new';
 import Lobby from './components/Lobby';
 import Room from './components/Room';
+import RoomMusic from './components/RoomMusic';
 import './index.css';
 
 function App() {
@@ -28,6 +29,14 @@ function App() {
                         element={
                             <ProtectedRoute>
                                 <Room />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/room/:code/music"
+                        element={
+                            <ProtectedRoute>
+                                <RoomMusic />
                             </ProtectedRoute>
                         }
                     />

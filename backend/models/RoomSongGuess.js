@@ -1,31 +1,26 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../database');
 
-const RoomAnswer = sequelize.define('RoomAnswer', {
+const RoomSongGuess = sequelize.define('RoomSongGuess', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    questionId: {
+    roundId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: 'question_id'
+        field: 'round_id'
     },
     userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         field: 'user_id'
     },
-    answerText: {
+    guessText: {
         type: DataTypes.STRING(200),
         allowNull: false,
-        field: 'answer_text'
-    },
-    correctAnswerText: {
-        type: DataTypes.STRING(200),
-        allowNull: false,
-        field: 'correct_answer_text'
+        field: 'guess_text'
     },
     isCorrect: {
         type: DataTypes.BOOLEAN,
@@ -34,7 +29,7 @@ const RoomAnswer = sequelize.define('RoomAnswer', {
     }
 }, {
     timestamps: true,
-    tableName: 'room_answers'
+    tableName: 'room_song_guesses'
 });
 
-module.exports = RoomAnswer;
+module.exports = RoomSongGuess;

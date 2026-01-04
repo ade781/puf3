@@ -65,10 +65,18 @@ Base path: `/api`
 
 ### Game
 - `POST /game/question` (butuh `X-User-Id`)
-- `POST /game/answer` (butuh `X-User-Id`)
+- `POST /game/options` (butuh `X-User-Id`)
+- `POST /game/selection` (butuh `X-User-Id`)
 - `GET /game/:roomCode/current` (butuh `X-User-Id`)
 - `GET /game/:roomCode/history` (butuh `X-User-Id`)
 - `POST /game/:roomCode/next` (butuh `X-User-Id`)
+
+### Musik (Tebak Lagu)
+- `POST /music/random` (butuh `X-User-Id`)
+- `POST /music/guess` (butuh `X-User-Id`)
+- `POST /music/surrender` (butuh `X-User-Id`)
+- `GET /music/:roomCode/current` (butuh `X-User-Id`)
+- `GET /music/:roomCode/history` (butuh `X-User-Id`)
 
 ## Contoh request
 ```bash

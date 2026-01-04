@@ -56,6 +56,7 @@ npm run preview
 - Buat atau gabung room
 - Tanya-jawab (tanpa sistem benar/salah)
 - Pilih pertanyaan acak saat membuat pertanyaan
+- Mode Tebak Lagu (2 pemain, lagu acak dari Deezer preview)
 
 ## Environment variables
 - `VITE_API_URL` - Base URL backend API, harus mengandung `/api`

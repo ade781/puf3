@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../database');
 
-const RoomAnswer = sequelize.define('RoomAnswer', {
+const RoomSelection = sequelize.define('RoomSelection', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -17,15 +17,10 @@ const RoomAnswer = sequelize.define('RoomAnswer', {
         allowNull: false,
         field: 'user_id'
     },
-    answerText: {
-        type: DataTypes.STRING(200),
+    selectedOptionId: {
+        type: DataTypes.INTEGER,
         allowNull: false,
-        field: 'answer_text'
-    },
-    correctAnswerText: {
-        type: DataTypes.STRING(200),
-        allowNull: false,
-        field: 'correct_answer_text'
+        field: 'selected_option_id'
     },
     isCorrect: {
         type: DataTypes.BOOLEAN,
@@ -34,7 +29,7 @@ const RoomAnswer = sequelize.define('RoomAnswer', {
     }
 }, {
     timestamps: true,
-    tableName: 'room_answers'
+    tableName: 'room_selections'
 });
 
-module.exports = RoomAnswer;
+module.exports = RoomSelection;

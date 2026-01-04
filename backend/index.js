@@ -6,6 +6,7 @@ const { connectDB } = require('./database');
 const authRoutes = require('./routes/authRoutes');
 const roomRoutes = require('./routes/roomRoutes');
 const gameRoutes = require('./routes/gameRoutes');
+const musicRoutes = require('./routes/musicRoutes');
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/game', gameRoutes);
+app.use('/api/music', musicRoutes);
 
 // Health check
 app.get('/', (req, res) => {
